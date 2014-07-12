@@ -10,7 +10,7 @@ if command -v nproc >/dev/null 2>&1 ; then
 elif command -v gnproc >/dev/null 2>&1 ; then
 	NUMCPUS=$(gnproc)
 elif command -v sysctl >/dev/null 2>&1 ; then
-	NUMCPUS=$(sysctl hw.ncpu | awk '{print $2}')
+	NUMCPUS=$(sysctl -n hw.ncpu)
 else
 	NUMCPUS=4 ; # Hopefully sane default in 2014
 fi
