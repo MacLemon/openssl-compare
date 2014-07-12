@@ -20,22 +20,3 @@ function bold() {
 	local text=${1}
 	echo "$(tput bold)${text}$(tput sgr0)"
 };
-
-# Autodetect MD5 checker, md5sum, md5, openssl dgst -md5
-if command -v md5sum >/dev/null 2>&1 ; then # md5sum is used on Linux
-        function md5check() {
-                echo $(md5sum ${1} | awk '{ print $1 }')
-        }
-elif command -v md5 >/dev/null 2>&1 ; then # md5 is used on OS X
-        function md5check() {
-                echo $(md5 ${1} | awk '{ print $4 }')
-        }
-elif command -v openssl >/dev/null 2>&1 ; then # openssl is used if none of the above are found.
-        function md5check() {
-                echo $(openssl dgst -md5 ${1} | awk '{ print $2 }')
-        }
-else
-        fail "No utility to check MD5 found."
-        exit 1
-fi
-
