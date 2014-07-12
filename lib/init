@@ -27,7 +27,7 @@ function verify_tarballs() {
 function extract_tarballs() {
         for file in work/*.tar.gz; do
                 echo -ne "\textracting: ${file}"
-		tar xfiz ${file} -C "work/" || fail "could not extract ${file}"
+		tar xzf ${file} -C "work/" || fail "could not extract ${file}"
 		echo -e "\t\t$(bold DONE)"
 	done
 }
