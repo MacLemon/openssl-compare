@@ -5,12 +5,22 @@
 
 source lib/common.inc
 
+if command -v nproc >/dev/null 2>&1 ; then
+	NUMCPUS=$(nproc)
+elif command -v gnproc >/dev/null 2>&1 ; then
+	NUMCPUS=$(gnproc)
+elif command -v sysctl >/dev/null 2>&1 ; then
+	NUMCPUS=$(sysctl hw.ncpu | awk '{print $2}')
+else
+	NUMCPUS=4 ; # Hopefully sane default in 2014
+fi
+
 function buildjob() {
 	local ret=0
 	gcc -v
 	[ -f Configure ] 	&& ./Configure
 	./config		|| return
-	time make -j$(nproc)	|| ret=$?
+	time make -j$NUMCPUS	|| ret=$?
 	[ -f util/selftest.pl ] && perl util/selftest.pl
 	return ${ret}
 	# some OpenSSL versions (such as 0.9.8 and 1.0.1) will produce
@@ -22,7 +32,8 @@ function buildjob() {
 
 [ -d work ] || fail "no 'work/' directory exists"
 
-timestamp=$(date --rfc-3339=seconds | sed 's/ /_/')
+# timestamp=$(date --rfc-3339=seconds | sed 's/ /_/')
+timestamp=$(date -u +"%Y-%m-%d_%H-%M-%S")
 echo "${banner} full log in work/OPENSSLDIR/buildlog-${timestamp}.log"
 for dir in work/*/; do
 	echo -ne "\tbuilding in ${dir} "
@@ -35,4 +46,3 @@ for dir in work/*/; do
 	fi
 	cd - &>/dev/null
 done
-
