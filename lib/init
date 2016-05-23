@@ -71,7 +71,7 @@ if command -v wget >/dev/null 2>&1 ; then
 		"https://www.openssl.org/source" &>/dev/null || fail "could not download OpenSSL"	
 elif command -v curl >/dev/null 2>&1 ; then
 	# Yes, this is ugly
-	cd work && curl -s 'https://www.openssl.org/source/' | grep .tar.gz | sed -e 's/^.*href=\"/https\:\/\/www\.openssl\.org\/source\//g' -e 's/\.tar\.gz.*/\.tar\.gz/g' | uniq | while read url; do curl -LO -# -R -C - "{$url}" -LO -# -R -C - "{$url}.md5" ; done ; cd ..
+	cd work && curl -s 'https://www.openssl.org/source/' | grep .tar.gz | sed -e 's/^.*href=\"/https\:\/\/www\.openssl\.org\/source\//g' -e 's/\.tar\.gz.*/\.tar\.gz/g' | uniq | while read url; do curl -LO -# -R -C - "{$url}" -LO -# -R -C - "{$url}.sha256" ; done ; cd ..
 else
 	fail "Could't find wget or curl to fetch sources."
 	exit 1
