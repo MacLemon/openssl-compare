@@ -9,12 +9,12 @@ function verify_tarballs() {
 	# OpenSSL fact: improper use of md5sum. you cannot mass verify tarballs
 	# http://nopaste.narf.at/show/DL0GE8RcTKH0BZO3vLux/
 	for file in work/*.tar.gz; do
-		if [ ! -f ${file}.md5 ]; then
-			echo -e "\t${file}: $(bold "NO MD5 SIGNATURE")"
+		if [ ! -f ${file}.sha256 ]; then
+			echo -e "\t${file}: $(bold "NO SHA256 SIGNATURE")"
 			continue
 		fi
-		local sum_local=$(md5check ${file})
-		local sum_remote=$(cat ${file}.md5 2>/dev/null | sed 's/.*=\ //')
+		local sum_local=$(sha256check ${file})
+		local sum_remote=$(cat ${file}.sha256 2>/dev/null | sed 's/.*=\ //')
 		echo -ne "\t${file}: "
 		if [[ ${sum_local} == ${sum_remote} ]]; then
 			echo "$(bold verified)"
@@ -33,20 +33,12 @@ function extract_tarballs() {
 }
 
 # Autodetect MD5 checker, md5sum, md5, openssl dgst -md5
-if command -v md5sum >/dev/null 2>&1 ; then # md5sum is used on Linux
-        function md5check() {
-                echo $(md5sum ${1} | awk '{ print $1 }')
-        }
-elif command -v md5 >/dev/null 2>&1 ; then # md5 is used on OS X
-        function md5check() {
-                echo $(md5 ${1} | awk '{ print $4 }')
-        }
-elif command -v openssl >/dev/null 2>&1 ; then # openssl is used if none of the above are found.
-        function md5check() {
-                echo $(openssl dgst -md5 ${1} | awk '{ print $2 }')
+if command -v openssl >/dev/null 2>&1 ; then
+        function sha256check() {
+                echo $(openssl dgst -sha256 ${1} | awk '{ print $2 }')
         }
 else
-        fail "No utility to check MD5 found."
+        fail "FATAL: No OpenSSL found to check SHA256"
         exit 1
 fi
 
@@ -75,7 +67,7 @@ fi
 echo "${banner} downloading all OpenSSL sources - this might take a while"
 
 if command -v wget >/dev/null 2>&1 ; then
-	wget -r -l2 -nd -Nc -A "*.tar.gz" -A "*.md5" -P "work/" \
+	wget -r -l2 -nd -Nc -A "*.tar.gz" -A "*.sha256" -P "work/" \
 		"https://www.openssl.org/source" &>/dev/null || fail "could not download OpenSSL"	
 elif command -v curl >/dev/null 2>&1 ; then
 	# Yes, this is ugly
